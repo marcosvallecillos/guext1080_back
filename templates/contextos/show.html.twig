@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Contextos{% endblock %}
+
+{% block body %}
+    <h1>Contextos</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ contexto.id }}</td>
+            </tr>
+            <tr>
+                <th>Code</th>
+                <td>{{ contexto.code }}</td>
+            </tr>
+            <tr>
+                <th>Cade_translate</th>
+                <td>{{ contexto.cadeTranslate }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_contextos_index') }}">back to list</a>
+
+    <a href="{{ path('app_contextos_edit', {'id': contexto.id}) }}">edit</a>
+
+    {{ include('contextos/_delete_form.html.twig') }}
+{% endblock %}

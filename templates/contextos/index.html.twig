@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Contextos index{% endblock %}
+
+{% block body %}
+    <h1>Contextos index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Code</th>
+                <th>Cade_translate</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for contexto in contextos %}
+            <tr>
+                <td>{{ contexto.id }}</td>
+                <td>{{ contexto.code }}</td>
+                <td>{{ contexto.cadeTranslate }}</td>
+                <td>
+                    <a href="{{ path('app_contextos_show', {'id': contexto.id}) }}">show</a>
+                    <a href="{{ path('app_contextos_edit', {'id': contexto.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_contextos_new') }}">Create new</a>
+{% endblock %}

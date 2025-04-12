@@ -1,0 +1,26 @@
+version: "3.7"
+services:
+  server-php:
+    container_name: servidor_php
+    build:
+      dockerfile: Dockerfile
+      context: .
+    restart: unless-stopped
+    volumes:
+      - ../:/www/html
+    stdin_open: true
+    links:
+      - mariadb-server
+    ports:
+      - "8000:8000"
+  mariadb-server:
+    container_name: servidor_db
+    image: mariadb
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
+    environment:
+      MYSQL_USER: root
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ../.db_mysql/:/var/lib/mysql

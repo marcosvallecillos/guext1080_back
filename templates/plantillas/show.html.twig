@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Plantillas{% endblock %}
+
+{% block body %}
+    <h1>Plantillas</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ plantilla.id }}</td>
+            </tr>
+            <tr>
+                <th>Code</th>
+                <td>{{ plantilla.code }}</td>
+            </tr>
+            <tr>
+                <th>Subject</th>
+                <td>{{ plantilla.subject }}</td>
+            </tr>
+            <tr>
+                <th>Content</th>
+                <td>{{ plantilla.content }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_plantillas_index') }}">back to list</a>
+
+    <a href="{{ path('app_plantillas_edit', {'id': plantilla.id}) }}">edit</a>
+
+    {{ include('plantillas/_delete_form.html.twig') }}
+{% endblock %}

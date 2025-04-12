@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Plantillas{% endblock %}
+
+{% block body %}
+    <h1>Edit Plantillas</h1>
+
+    {{ include('plantillas/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_plantillas_index') }}">back to list</a>
+
+    {{ include('plantillas/_delete_form.html.twig') }}
+{% endblock %}

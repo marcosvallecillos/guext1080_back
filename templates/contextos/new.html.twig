@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Contextos{% endblock %}
+
+{% block body %}
+    <h1>Create new Contextos</h1>
+
+    {{ include('contextos/_form.html.twig') }}
+
+    <a href="{{ path('app_contextos_index') }}">back to list</a>
+{% endblock %}

@@ -2,11 +2,13 @@
 
 namespace App\Controller;
 
+use App\Entity\Contextos;
 use App\Entity\Plantillas;
 use App\Form\PlantillasType;
 use App\Repository\PlantillasRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -21,27 +23,42 @@ final class PlantillasController extends AbstractController
         ]);
     }
 
-    #[Route('/createTemplate', name: 'app_plantillas_new', methods: ['POST'])]
-    public function create(Request $request, EntityManagerInterface $entityManager): Response
+    #[Route('api/createTemplate', name: 'app_plantillas_new', methods: ['POST'])]
+    public function create(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
-        $plantilla = new Plantillas();
+        if (!isset($data['code']) || !isset($data['data'])) {
+            return new JsonResponse(['error' => 'Datos incompletos'], 400);
+        }
 
-        // Asignar los campos desde el JSON recibido (ajusta según tu entidad)
-        $plantilla->setCode($data['code'] ?? null);
-        $plantilla->setSubject($data['subject'] ?? null);
-        $plantilla->setContent($data['content'] ?? null);
-        $plantilla->setIdcontext($data['idContext'] ?? null);
-        // Agrega más campos si tu entidad los tiene
+        $plantilla = new Plantillas();
+        $plantilla->setCode($data['code']);
+
+        if (isset($data['data']['es']['subject'])) {
+            $plantilla->setSubject($data['data']['es']['subject']);
+        }
+
+        if (isset($data['data']['es']['content'])) {
+            $plantilla->setContent($data['data']['es']['content']);
+        }
+
+        if (isset($data['idContext'])) {
+            $contexto = $entityManager->getRepository(Contextos::class)->find($data['idContext']);
+            if (!$contexto) {
+                return new JsonResponse(['error' => 'Contexto no encontrado'], 404);
+            }
+            $plantilla->setIdcontext($contexto);
+        }
 
         $entityManager->persist($plantilla);
         $entityManager->flush();
 
-        return new Response(['status' => 'Plantilla creada'], 201);
+        return new JsonResponse(['status' => 'Plantilla creada'], 201);
     }
 
-    #[Route('/showTemplate/{id}', name: 'app_plantillas_show', methods: ['GET'])]
+
+    #[Route('api/showTemplate/{id}', name: 'app_plantillas_show', methods: ['GET'])]
     public function show(Plantillas $plantilla): Response
     {
         $data = [
@@ -54,7 +71,52 @@ final class PlantillasController extends AbstractController
         return new Response($data);
     }
 
-    #[Route('/updateTemplate/{id}', name: 'app_plantillas_edit', methods: ['PATCH'])]
+
+    #[Route('api/listTemplate/{idContext}', name: 'app_variables_show', methods: ['GET'])]
+    public function listTemplate(int $idContext): JsonResponse
+    {
+        try {
+            $templates = $this->listTemplatesByContext($idContext);
+            return new JsonResponse($templates, JsonResponse::HTTP_OK);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'mensaje' => 'Error al procesar las variables de contexto específico',
+                'error' => $e->getMessage()
+            ], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function listTemplatesByContext(int $idContext): array
+    {
+        $contexto = $this->entityManager->getRepository(Contextos::class)->find($idContext);
+        if (!$contexto) {
+            throw new \Exception("Contexto con id $idContext no existe.");
+        }
+
+        $templates = [];
+        $plantillas = $contexto->getPlantillas();
+
+        foreach ($plantillas as $plantilla) {
+            $templates[] = [
+                'id' => $plantilla->getId(),
+                'code' => $plantilla->getCode(),
+                'data' => [
+                    'es' => [
+                        'content' => $plantilla->getData()['es']['content'] ?? '',
+                        'subject' => $plantilla->getData()['es']['subject'] ?? '',
+                    ],
+                    'en' => [
+                        'content' => $plantilla->getData()['en']['content'] ?? '',
+                        'subject' => $plantilla->getData()['en']['subject'] ?? '',
+                    ]
+                ],
+                'idContext' => $contexto->getId()
+            ];
+        }
+        return $templates;
+    }
+
+    #[Route('api/updateTemplate/{id}', name: 'app_plantillas_edit', methods: ['PATCH'])]
     public function partialUpdate(Request $request, Plantillas $plantilla, EntityManagerInterface $entityManager): Response
     {
         $data = json_decode($request->getContent(), true);
@@ -65,13 +127,12 @@ final class PlantillasController extends AbstractController
         if (isset($data['content'])) {
             $plantilla->setContent($data['content']);
         }
-            $entityManager->flush();
+        $entityManager->flush();
 
-            return new Response(['status' => 'Plantilla actualizada']);
-        }
+        return new Response(['status' => 'Plantilla actualizada']);
+    }
 
-
-    #[Route('/plantillas/{id}', methods: ['DELETE'], name: 'plantillas_delete')]
+    #[Route('api/deleteTemplate/{id}', methods: ['DELETE'], name: 'plantillas_delete')]
     public function delete(Plantillas $plantilla, EntityManagerInterface $em): Response
     {
         $em->remove($plantilla);

@@ -22,6 +22,7 @@ class Variables
      * @var Collection<int, Contextos>
      */
     #[ORM\ManyToMany(targetEntity: Contextos::class, inversedBy: 'variables')]
+    #[ORM\JoinTable(name: 'contextos_variables')]
     private Collection $contextos;
 
     public function __construct()

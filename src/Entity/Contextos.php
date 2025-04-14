@@ -25,7 +25,6 @@ class Contextos
      * @var Collection<int, Variables>
      */
     #[ORM\ManyToMany(targetEntity: Variables::class, mappedBy: 'contextos')]
-    #[ORM\JoinTable(name: 'contextos_variables')]
     private Collection $variables;
 
     /**
@@ -82,27 +81,5 @@ class Contextos
     public function getPlantillas(): Collection
     {
         return $this->plantillas;
-    }
-
-    public function addPlantilla(Plantillas $plantilla): static
-    {
-        if (!$this->plantillas->contains($plantilla)) {
-            $this->plantillas->add($plantilla);
-            $plantilla->setIdcontext($this);
-        }
-
-        return $this;
-    }
-
-    public function removePlantilla(Plantillas $plantilla): static
-    {
-        if ($this->plantillas->removeElement($plantilla)) {
-            // set the owning side to null (unless already changed)
-            if ($plantilla->getIdcontext() === $this) {
-                $plantilla->setIdcontext(null);
-            }
-        }
-
-        return $this;
     }
 }

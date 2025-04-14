@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class ContextosController extends AbstractController
 {
-    #[Route('/api/contextos', name: 'app_contextos_index')]
+    #[Route('/api/contexts', name: 'app_contextos_index')]
     public function index(ContextosRepository $contextosRepository): JsonResponse
     {
         $contextos = $contextosRepository->findAll();

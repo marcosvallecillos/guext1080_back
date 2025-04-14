@@ -2,18 +2,25 @@
 
 namespace App\Controller;
 
+use App\Entity\Contextos;
 use App\Entity\Variables;
-use App\Form\VariablesType;
 use App\Repository\VariablesRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Doctrine\ORM\EntityManagerInterface;
 
-#[Route('/variables')]
 final class VariablesController extends AbstractController
 {
+    private EntityManagerInterface $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
+
     #[Route(name: 'app_variables_index', methods: ['GET'])]
     public function index(VariablesRepository $variablesRepository): Response
     {
@@ -22,15 +29,37 @@ final class VariablesController extends AbstractController
         ]);
     }
 
-
-
-    #[Route('/showVariables', name: 'app_variables_show', methods: ['GET'])]
-    public function show(Variables $variable): Response
+    #[Route('api/showVariables/{idContext}', name: 'app_variables_show', methods: ['GET'])]
+    public function showVariables(int $idContext): JsonResponse
     {
-        return $this->render('variables/show.html.twig', [
-            'variable' => $variable,
-        ]);
+        try {
+            $variables = $this->showVariablesByContext($idContext);
+            return new JsonResponse($variables, JsonResponse::HTTP_OK);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'mensaje' => 'Error al procesar las variables de contexto específico',
+                'error' => $e->getMessage()
+            ], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
+    public function showVariablesByContext(int $idContext): array
+    {
+        $contexto = $this->entityManager->getRepository(Contextos::class)->find($idContext);
+        if (!$contexto) {
+            throw new \Exception("Contexto con id $idContext no existe.");
+        }
 
+        $variables = [];
+        foreach ($contexto->getVariables() as $variableContext) {
+            $variables[] = [
+                'data' => [
+                    'id' => $variableContext->getId(),
+                    'code' => $variableContext->getCode(),
+                ],
+                "idContext" => $contexto->getId(),
+            ];
+        }
+        return $variables;
+    }
 }

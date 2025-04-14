@@ -12,13 +12,13 @@ class Plantillas
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'string', length: 255)]
     private ?string $code = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $subject = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $content = null;
 
     #[ORM\ManyToOne(targetEntity: Contextos::class, inversedBy: 'plantillas')]

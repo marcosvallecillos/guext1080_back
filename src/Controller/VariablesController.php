@@ -29,7 +29,7 @@ final class VariablesController extends AbstractController
         ]);
     }
 
-    #[Route('api/showVariables/{idContext}', name: 'app_variables_show', methods: ['GET'])]
+    #[Route('/api/showVariables/{idContext}', name: 'app_variables_show', methods: ['GET'])]
     public function showVariables(int $idContext): JsonResponse
     {
         try {
@@ -37,7 +37,7 @@ final class VariablesController extends AbstractController
             return new JsonResponse($variables, JsonResponse::HTTP_OK);
         } catch (\Exception $e) {
             return new JsonResponse([
-                'mensaje' => 'Error al procesar las variables de contexto específico',
+                'mensaje' => 'Error al procesar las variables de contexto especifico',
                 'error' => $e->getMessage()
             ], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
@@ -53,7 +53,7 @@ final class VariablesController extends AbstractController
         $variables = [];
         foreach ($contexto->getVariables() as $variableContext) {
             $variables[] = [
-                'data' => [
+                'dataVariable' => [
                     'id' => $variableContext->getId(),
                     'code' => $variableContext->getCode(),
                 ],

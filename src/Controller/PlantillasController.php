@@ -15,6 +15,12 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class PlantillasController extends AbstractController
 {
+    private EntityManagerInterface $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
     #[Route(name: 'app_plantillas_index', methods: ['GET'])]
     public function index(PlantillasRepository $plantillasRepository): Response
     {
@@ -72,15 +78,15 @@ final class PlantillasController extends AbstractController
     }
 
 
-    #[Route('api/listTemplate/{idContext}', name: 'app_variables_show', methods: ['GET'])]
-    public function listTemplate(int $idContext): JsonResponse
+    #[Route('/api/listTemplate/{id}', name: 'list_templates_show', methods: ['GET'])]
+    public function listTemplate(int $id): JsonResponse
     {
         try {
-            $templates = $this->listTemplatesByContext($idContext);
+            $templates = $this->listTemplatesByContext($id);
             return new JsonResponse($templates, JsonResponse::HTTP_OK);
         } catch (\Exception $e) {
             return new JsonResponse([
-                'mensaje' => 'Error al procesar las variables de contexto específico',
+                'mensaje' => 'Error al procesar las plantillas de contexto especifico',
                 'error' => $e->getMessage()
             ], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
@@ -102,12 +108,12 @@ final class PlantillasController extends AbstractController
                 'code' => $plantilla->getCode(),
                 'data' => [
                     'es' => [
-                        'content' => $plantilla->getData()['es']['content'] ?? '',
-                        'subject' => $plantilla->getData()['es']['subject'] ?? '',
+                        'content' => $plantilla->getContent()['es']['content'] ?? '',
+                        'subject' => $plantilla->getSubject()['es']['subject'] ?? '',
                     ],
                     'en' => [
-                        'content' => $plantilla->getData()['en']['content'] ?? '',
-                        'subject' => $plantilla->getData()['en']['subject'] ?? '',
+                        'content' => $plantilla->getContent()['en']['content'] ?? '',
+                        'subject' => $plantilla->getSubject()['en']['subject'] ?? '',
                     ]
                 ],
                 'idContext' => $contexto->getId()

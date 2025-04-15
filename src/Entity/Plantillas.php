@@ -15,11 +15,8 @@ class Plantillas
     #[ORM\Column(type: 'string', length: 255)]
     private ?string $code = null;
 
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private ?string $subject = null;
-
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private ?string $content = null;
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $data = null;
 
     #[ORM\ManyToOne(targetEntity: Contextos::class, inversedBy: 'plantillas')]
     #[ORM\JoinColumn(nullable: false)]
@@ -42,26 +39,14 @@ class Plantillas
         return $this;
     }
 
-    public function getSubject(): ?string
+    public function getData(): array
     {
-        return $this->subject;
+        return json_decode($this->data ?? '{}', true);
     }
 
-    public function setSubject(string $subject): static
+    public function setData(array $data): static
     {
-        $this->subject = $subject;
-        return $this;
-    }
-
-    public function getContent(): ?string
-    {
-        return $this->content;
-    }
-
-    public function setContent(string $content): static
-    {
-        $this->content = $content;
-
+        $this->data = json_encode($data);
         return $this;
     }
 

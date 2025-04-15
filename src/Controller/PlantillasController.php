@@ -41,12 +41,8 @@ final class PlantillasController extends AbstractController
         $plantilla = new Plantillas();
         $plantilla->setCode($data['code']);
 
-        if (isset($data['data']['es']['subject'])) {
-            $plantilla->setSubject($data['data']['es']['subject']);
-        }
-
-        if (isset($data['data']['es']['content'])) {
-            $plantilla->setContent($data['data']['es']['content']);
+        if (isset($data['data'])) {
+            $plantilla->setData($data['data']);
         }
 
         if (isset($data['idContext'])) {
@@ -70,8 +66,7 @@ final class PlantillasController extends AbstractController
         $data = [
             'id' => $plantilla->getId(),
             'code' => $plantilla->getCode(),
-            'subject' => $plantilla->getSubject(),
-            'content' => $plantilla->getContent(),
+            'data' => $plantilla->getData(),
             'idcontext' => $plantilla->getIdcontext(),
         ];
         return new JsonResponse($data);
@@ -106,16 +101,7 @@ final class PlantillasController extends AbstractController
             $templates[] = [
                 'id' => $plantilla->getId(),
                 'code' => $plantilla->getCode(),
-                'data' => [
-                    'es' => [
-                        'content' => $plantilla->getContent()['es']['content'] ?? '',
-                        'subject' => $plantilla->getSubject()['es']['subject'] ?? '',
-                    ],
-                    'en' => [
-                        'content' => $plantilla->getContent()['en']['content'] ?? '',
-                        'subject' => $plantilla->getSubject()['en']['subject'] ?? '',
-                    ]
-                ],
+                'data' => $plantilla->getData(),
                 'idContext' => $contexto->getId()
             ];
         }
@@ -138,12 +124,18 @@ final class PlantillasController extends AbstractController
         return new Response(['status' => 'Plantilla actualizada']);
     }
 
-    #[Route('api/deleteTemplate/{id}', methods: ['DELETE'], name: 'plantillas_delete')]
-    public function delete(Plantillas $plantilla, EntityManagerInterface $em): Response
+    #[Route('api/deleteTemplate/{id}', methods: ['DELETE'], name: 'templates_delete')]
+    public function delete(Plantillas $plantilla, EntityManagerInterface $em): JsonResponse
     {
-        $em->remove($plantilla);
-        $em->flush();
-
-        return new Response(['status' => 'Plantilla eliminada']);
+        try {
+            $em->remove($plantilla);
+            $em->flush();
+            return new JsonResponse(['status' => 'Plantilla eliminada'], JsonResponse::HTTP_OK);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'mensaje' => 'Error al eliminar la plantilla',
+                'error' => $e->getMessage()
+            ], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Contextos;
 use App\Repository\ContextosRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -13,19 +14,46 @@ use Symfony\Component\Routing\Attribute\Route;
 final class ContextosController extends AbstractController
 {
     #[Route('/api/contexts', name: 'app_contextos_index')]
-    public function index(ContextosRepository $contextosRepository): JsonResponse
+    public function index(ContextosRepository $contextsRepository): JsonResponse
     {
-        $contextos = $contextosRepository->findAll();
-        $data = [];
-        foreach ($contextos as $contexto) {
-            $data[] = [
-                'id' => $contexto->getId(),
-                'code' => $contexto->getCode(),
-                'code_translate' => $contexto->getCodeTranslate(),
-                'variables' => $contexto->getVariables() ?? [],
-                'plantillas' => $contexto->getPlantillas() ?? [],
-            ];
+        try {
+            $contexts = $contextsRepository->findAll();
+            $data = [];
+            foreach ($contexts as $context) {
+                $data[] = [
+                    'id' => $context->getId(),
+                    'code' => $context->getCode(),
+                    'code_translate' => $context->getCodeTranslate(),
+                    'variables' => $context->getVariables() ?? [],
+                    'templates' => $context->getPlantillas() ?? [],
+                ];
+            }
+            return new JsonResponse($data, Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'mensaje' => 'Error al obtener los datos del contexto especifico',
+                'error' => $e->getMessage()
+            ], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
-        return new JsonResponse($data);
+    }
+
+    #[Route('/api/showContext/{id}', name: 'list_contexts_show', methods: ['GET'])]
+    public function showContextById(Contextos $context): JsonResponse
+    {
+        try {
+            $data = [
+                'id' => $context->getId(),
+                'code' => $context->getCode(),
+                'code_translate' => $context->getCodeTranslate(),
+                'variables' => $context->getVariables(),
+                'templates' => $context->getPlantillas(),
+            ];
+            return new JsonResponse($data, Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'mensaje' => 'Error al visualizar la informacion del contexto',
+                'error' => $e->getMessage()
+            ], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }

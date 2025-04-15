@@ -22,10 +22,10 @@ final class PlantillasController extends AbstractController
         $this->entityManager = $entityManager;
     }
     #[Route(name: 'app_plantillas_index', methods: ['GET'])]
-    public function index(PlantillasRepository $plantillasRepository): Response
+    public function index(PlantillasRepository $templatesRepository): Response
     {
         return $this->render('plantillas/index.html.twig', [
-            'plantillas' => $plantillasRepository->findAll(),
+            'templates' => $templatesRepository->findAll(),
         ]);
     }
 
@@ -65,7 +65,7 @@ final class PlantillasController extends AbstractController
 
 
     #[Route('api/showTemplate/{id}', name: 'app_plantillas_show', methods: ['GET'])]
-    public function show(Plantillas $plantilla): Response
+    public function showTemplateById(Plantillas $plantilla): Response
     {
         $data = [
             'id' => $plantilla->getId(),
@@ -74,7 +74,7 @@ final class PlantillasController extends AbstractController
             'content' => $plantilla->getContent(),
             'idcontext' => $plantilla->getIdcontext(),
         ];
-        return new Response($data);
+        return new JsonResponse($data);
     }
 
 

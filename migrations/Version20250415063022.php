@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20250414170008 extends AbstractMigration
+final class Version20250415063022 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -22,6 +22,9 @@ final class Version20250414170008 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql(<<<'SQL'
             CREATE TABLE contextos (id INT AUTO_INCREMENT NOT NULL, code VARCHAR(255) NOT NULL, code_translate VARCHAR(255) NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE TABLE idiomas (id INT AUTO_INCREMENT NOT NULL, code VARCHAR(2) NOT NULL, name VARCHAR(255) NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
         SQL);
         $this->addSql(<<<'SQL'
             CREATE TABLE plantillas (id INT AUTO_INCREMENT NOT NULL, idcontext_id INT NOT NULL, code VARCHAR(255) NOT NULL, subject VARCHAR(255) DEFAULT NULL, content VARCHAR(255) DEFAULT NULL, INDEX IDX_E91A52B7A6A9DCF5 (idcontext_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
@@ -60,6 +63,9 @@ final class Version20250414170008 extends AbstractMigration
         SQL);
         $this->addSql(<<<'SQL'
             DROP TABLE contextos
+        SQL);
+        $this->addSql(<<<'SQL'
+            DROP TABLE idiomas
         SQL);
         $this->addSql(<<<'SQL'
             DROP TABLE plantillas

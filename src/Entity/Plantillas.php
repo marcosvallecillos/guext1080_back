@@ -3,6 +3,7 @@
 namespace App\Entity;
 use App\Repository\PlantillasRepository;
 use Doctrine\ORM\Mapping as ORM;
+use stdClass;
 
 #[ORM\Entity(repositoryClass: PlantillasRepository::class)]
 class Plantillas
@@ -39,9 +40,18 @@ class Plantillas
         return $this;
     }
 
-    public function getData(): array
+    public function getData(): ?stdClass
     {
-        return json_decode($this->data ?? '{}', true);
+        if (empty($this->data)) {
+            return new \stdClass();
+        }
+
+        $decoded = json_decode($this->data, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return new \stdClass();
+        }
+        return $decoded;
     }
 
     public function setData(array $data): static

@@ -38,15 +38,23 @@ class Plantillas
 
         return $this;
     }
-
-    public function getData(): array
+    public function getData(): ?array
     {
-        return json_decode($this->data ?? '{}', true);
+        if (empty($this->data)) {
+            return [];
+        }
+
+        $decoded = json_decode($this->data, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return [];
+        }
+
+        return $decoded;
     }
 
     public function setData(array $data): static
     {
-        $this->data = json_encode($data);
+        $this->data = json_encode($data, JSON_UNESCAPED_UNICODE);
         return $this;
     }
 

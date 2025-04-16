@@ -21,6 +21,7 @@ final class PlantillasController extends AbstractController
     {
         $this->entityManager = $entityManager;
     }
+
     #[Route(name: 'app_plantillas_index', methods: ['GET'])]
     public function index(PlantillasRepository $templatesRepository): Response
     {
@@ -109,19 +110,22 @@ final class PlantillasController extends AbstractController
     }
 
     #[Route('api/updateTemplate/{id}', name: 'app_plantillas_edit', methods: ['PATCH'])]
-    public function partialUpdate(Request $request, Plantillas $plantilla, EntityManagerInterface $entityManager): Response
+    public function updateTemplatesDB(Request $request, Plantillas $plantilla, EntityManagerInterface $entityManager): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
+        try {
+            $data = json_decode($request->getContent(), true);
 
-        if (isset($data['code'])) {
-            $plantilla->setCode($data['code']);
+            if (isset($data['data'])) {
+                $plantilla->setData($data['data']);
+            }
+            $entityManager->flush();
+            return new JsonResponse(['status' => 'Plantilla actualizada'], JsonResponse::HTTP_OK);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'mensaje' => 'Error al actualizar la plantilla',
+                'error' => $e->getMessage()
+            ], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
-        if (isset($data['content'])) {
-            $plantilla->setContent($data['content']);
-        }
-        $entityManager->flush();
-
-        return new Response(['status' => 'Plantilla actualizada']);
     }
 
     #[Route('api/deleteTemplate/{id}', methods: ['DELETE'], name: 'templates_delete')]

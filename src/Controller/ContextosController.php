@@ -19,18 +19,18 @@ final class ContextosController extends AbstractController
         try {
             $contexts = $contextsRepository->findAll();
             $data = [];
+
             foreach ($contexts as $context) {
                 $data[] = [
                     'id' => $context->getId(),
-                    'code' => $context->getCode(),
-                    'variables' => $context->getVariables() ?? [],
-                    'templates' => $context->getPlantillas() ?? [],
+                    'code' => $context->getCode()
                 ];
             }
+
             return new JsonResponse($data, Response::HTTP_OK);
         } catch (\Exception $e) {
             return new JsonResponse([
-                'mensaje' => 'Error al obtener los datos del contexto especifico',
+                'mensaje' => 'Error al obtener los datos del contexto',
                 'error' => $e->getMessage()
             ], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
@@ -43,9 +43,6 @@ final class ContextosController extends AbstractController
             $data = [
                 'id' => $context->getId(),
                 'code' => $context->getCode(),
-                'code_translate' => $context->getCodeTranslate(),
-                'variables' => $context->getVariables(),
-                'templates' => $context->getPlantillas(),
             ];
             return new JsonResponse($data, Response::HTTP_OK);
         } catch (\Exception $e) {

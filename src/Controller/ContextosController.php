@@ -23,7 +23,6 @@ final class ContextosController extends AbstractController
                 $data[] = [
                     'id' => $context->getId(),
                     'code' => $context->getCode(),
-                    'code_translate' => $context->getCodeTranslate(),
                     'variables' => $context->getVariables() ?? [],
                     'templates' => $context->getPlantillas() ?? [],
                 ];

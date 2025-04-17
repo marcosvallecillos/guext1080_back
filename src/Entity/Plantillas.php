@@ -3,6 +3,7 @@
 namespace App\Entity;
 use App\Repository\PlantillasRepository;
 use Doctrine\ORM\Mapping as ORM;
+use stdClass;
 
 #[ORM\Entity(repositoryClass: PlantillasRepository::class)]
 class Plantillas

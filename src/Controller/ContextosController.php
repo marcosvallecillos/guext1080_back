@@ -23,7 +23,14 @@ final class ContextosController extends AbstractController
             foreach ($contexts as $context) {
                 $data[] = [
                     'id' => $context->getId(),
-                    'code' => $context->getCode()
+                    'code' => $context->getCode(),
+                    'templates' => array_map(function ($template) {
+                        return [
+                            'id' => $template->getId(),
+                            'code' => $template->getCode(),
+                            'data' => $template->getData(),
+                        ];
+                    }, $context->getPlantillas()->toArray()),
                 ];
             }
 

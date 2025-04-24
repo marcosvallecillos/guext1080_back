@@ -18,9 +18,6 @@ class Contextos
     #[ORM\Column(length: 255)]
     private ?string $code = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $code_translate = null;
-
     /**
      * @var Collection<int, Variables>
      */
@@ -55,17 +52,6 @@ class Contextos
 
         return $this;
     }
-
-    public function getCodeTranslate(): ?string
-    {
-        return $this->code_translate;
-    }
-
-    public function setCodeTranslate(?string $code_translate): void
-    {
-        $this->code_translate = $code_translate;
-    }
-
     public function getVariables(): Collection
     {
         return $this->variables;

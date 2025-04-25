@@ -149,7 +149,6 @@ final class PlantillasController extends AbstractController
 
         $page = max(1, (int) $pageModel['page']);
         $size = (int) $pageModel['size'];
-
         $qb->setFirstResult(($page - 1) * $size)
             ->setMaxResults($size);
 

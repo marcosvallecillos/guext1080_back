@@ -119,8 +119,12 @@ final class PlantillasController extends AbstractController
             $pageModel = $data[0]['pageModel'];
             $filter = $data[0]['filter'];
 
-            $templates = $this->findTemplatesByFilters($pageModel, $filter);
-            return new JsonResponse($templates, JsonResponse::HTTP_OK);
+            $result = $this->findTemplatesByFilters($pageModel, $filter);
+
+            return new JsonResponse([
+                'templates' => $result['data'],
+                'total' => $result['total']
+            ], JsonResponse::HTTP_OK);
         } catch (\Exception $e) {
             return new JsonResponse([
                 'mensaje' => 'Error al procesar las plantillas con los filtros',
@@ -147,6 +151,13 @@ final class PlantillasController extends AbstractController
             }
         }
 
+        $qbCount = clone $qb;
+        $totalRecords = (int) $qbCount
+            ->select('COUNT(p.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        // Ahora sí hacemos la paginación
         $page = max(1, (int) $pageModel['page']);
         $size = (int) $pageModel['size'];
         $qb->setFirstResult(($page - 1) * $size)
@@ -157,14 +168,21 @@ final class PlantillasController extends AbstractController
             $qb->orderBy('p.' . $pageModel['orderBy'], $direction);
         }
 
-        return array_map(function ($template) {
+        $templates = $qb->getQuery()->getResult();
+
+        $formattedTemplates = array_map(function ($template) {
             return [
                 'id' => $template->getId(),
                 'code' => $template->getCode(),
                 'data' => $template->getData(),
                 'context' => $template->getIdcontext()->getCode()
             ];
-        }, $qb->getQuery()->getResult());
+        }, $templates);
+
+        return [
+            'data' => $formattedTemplates,
+            'total' => $totalRecords
+        ];
     }
 
     #[Route('api/updateTemplate/{id}', name: 'app_plantillas_edit', methods: ['PATCH'])]

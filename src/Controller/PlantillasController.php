@@ -138,6 +138,8 @@ final class PlantillasController extends AbstractController
         $repo = $this->entityManager->getRepository(Plantillas::class);
         $qb = $repo->createQueryBuilder('p')
             ->leftJoin('p.idcontext', 'c');
+        $qb->addSelect('c');
+
 
         if (!empty($filter['search'])) {
             $qb->andWhere('p.code LIKE :search')
@@ -165,7 +167,12 @@ final class PlantillasController extends AbstractController
 
         if (!empty($pageModel['orderBy'])) {
             $direction = strtoupper($pageModel['orientation'] ?? 'DESC');
-            $qb->orderBy('p.' . $pageModel['orderBy'], $direction);
+
+            if ($pageModel['orderBy'] === 'context') {
+                $qb->orderBy('c.code', $direction);
+            } else {
+                $qb->orderBy('p.' . $pageModel['orderBy'], $direction);
+            }
         }
 
         $templates = $qb->getQuery()->getResult();

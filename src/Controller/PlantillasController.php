@@ -137,13 +137,12 @@ final class PlantillasController extends AbstractController
     {
         $repo = $this->entityManager->getRepository(Plantillas::class);
         $qb = $repo->createQueryBuilder('p')
-            ->leftJoin('p.idcontext', 'c');
+            ->innerJoin('p.idcontext', 'c');
         $qb->addSelect('c');
-
 
         if (!empty($filter['search'])) {
             $qb->andWhere('p.code LIKE :search')
-                ->setParameter('search', '%' . $filter['search'] . '%');
+                ->setParameter('search', $filter['search'] . '%');
         }
 
         if (!empty($filter['context'])) {

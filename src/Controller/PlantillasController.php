@@ -166,7 +166,7 @@ final class PlantillasController extends AbstractController
             ->setMaxResults($size);
 
         if (!empty($pageModel['orderBy'])) {
-            $direction = strtoupper($pageModel['orientation'] ?? 'DESC');
+            $direction = strtoupper($pageModel['orientation']);
 
             if ($pageModel['orderBy'] === 'context') {
                 $qb->orderBy('c.code', $direction);

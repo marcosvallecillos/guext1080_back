@@ -191,6 +191,37 @@ final class PlantillasController extends AbstractController
         ];
     }
 
+    #[Route('/api/getAllTemplates', name: 'get_allTemplates', methods: ['GET'])]
+    public function getAllTemplates(): JsonResponse
+    {
+        try {
+            $repo = $this->entityManager->getRepository(Plantillas::class);
+            $qb = $repo->createQueryBuilder('p')
+                ->innerJoin('p.idcontext', 'c')
+                ->addSelect('c');
+
+            $templates = $qb->getQuery()->getResult();
+
+            $formattedTemplates = array_map(function ($template) {
+                return [
+                    'id' => $template->getId(),
+                    'code' => $template->getCode(),
+                    'data' => $template->getData(),
+                    'context' => $template->getIdcontext()->getCode()
+                ];
+            }, $templates);
+
+            return new JsonResponse([
+                'templates' => $formattedTemplates,
+            ], JsonResponse::HTTP_OK);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'mensaje' => 'Error al obtener las plantillas',
+                'error' => $e->getMessage()
+            ], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
     #[Route('api/updateTemplate/{id}', name: 'app_plantillas_edit', methods: ['PATCH'])]
     public function updateTemplatesDB(Request $request, Plantillas $plantilla, EntityManagerInterface $entityManager): JsonResponse
     {

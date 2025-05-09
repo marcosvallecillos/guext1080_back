@@ -255,4 +255,50 @@ final class PlantillasController extends AbstractController
             ], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    #[Route('api/renderTemplate', name: 'render_template', methods: ['POST'])]
+    public function renderTemplate(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        $idTemplate = $data['templateId'];
+        $languageCode = $data['languageCode'];
+        $dataVariables = $data['data']; // Asumimos que 'datos' es un array en el cuerpo del POST
+
+
+        $plantilla = $this->entityManager->getRepository(Plantillas::class)->find($idTemplate);
+
+        if (!$plantilla) {
+            return new JsonResponse(['error' => 'No se ha encontrado la plantilla con el ID: ' . $idTemplate], 404);
+        }
+
+        $dataJson = $plantilla->getData();
+
+        if (empty($dataJson) || !is_array($dataJson)) {
+            return new JsonResponse(['error' => 'No hay datos en esta plantilla.'], 400);
+        }
+
+        // Si no se encuentra el idioma solicitado, usar el idioma por defecto (español)
+        if (!isset($dataJson[$languageCode])) {
+            $languageCode = 'es';
+        }
+
+
+        $contenido = $dataJson[$languageCode]['content'] ?? null;
+        $subject = $dataJson[$languageCode]['subject'] ?? null;
+
+        if (!$contenido) {
+            return new JsonResponse(['error' => "La plantilla no tiene contenido para el idioma '$languageCode'."], 400);
+        }
+
+        // Reemplazar los placeholders en el contenido
+        foreach ($dataVariables as $key => $value) {
+            $contenido = str_replace("{{" . $key . "}}", $value, $contenido);
+        }
+
+        return new JsonResponse([
+            'rendered' => $contenido,
+            'subject' => $subject
+        ]);
+    }
 }

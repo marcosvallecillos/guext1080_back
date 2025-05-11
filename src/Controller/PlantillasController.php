@@ -291,9 +291,10 @@ final class PlantillasController extends AbstractController
             return new JsonResponse(['error' => "La plantilla no tiene contenido para el idioma '$languageCode'."], 400);
         }
 
-        // Reemplazar los placeholders en el contenido
         foreach ($dataVariables as $key => $value) {
-            $contenido = str_replace("{{" . $key . "}}", $value, $contenido);
+            $placeholder = "{{" . $key . "}}";
+            $contenido = str_replace($placeholder, $value, $contenido);
+            $subject = str_replace($placeholder, $value, $subject);
         }
 
         return new JsonResponse([

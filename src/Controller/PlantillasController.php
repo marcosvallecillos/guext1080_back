@@ -283,7 +283,6 @@ final class PlantillasController extends AbstractController
             $languageCode = 'es';
         }
 
-
         $contenido = $dataJson[$languageCode]['content'] ?? null;
         $subject = $dataJson[$languageCode]['subject'] ?? null;
 

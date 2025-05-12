@@ -64,12 +64,25 @@ final class PlantillasController extends AbstractController
     #[Route('api/showTemplate/{id}', name: 'app_plantillas_show', methods: ['GET'])]
     public function showTemplateById(Plantillas $plantilla): Response
     {
-        $data = [
-            'id' => $plantilla->getId(),
-            'code' => $plantilla->getCode(),
-            'data' => $plantilla->getData(),
-        ];
-        return new JsonResponse($data);
+        try {
+            if (!$plantilla) {
+                return new JsonResponse(['error' => 'Plantilla no encontrada'], 404);
+            }
+
+            $data = [
+                'id' => $plantilla->getId(),
+                'code' => $plantilla->getCode(),
+                'data' => $plantilla->getData(),
+            ];
+
+            return new JsonResponse($data, JsonResponse::HTTP_OK);
+
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'error' => 'Error inesperado',
+                'detalle' => $e->getMessage()
+            ], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     #[Route('api/listTemplate/{id}', name: 'list_templates_id', methods: ['GET'])]
@@ -90,7 +103,7 @@ final class PlantillasController extends AbstractController
     {
         $contexto = $this->entityManager->getRepository(Contextos::class)->find($idContext);
         if (!$contexto) {
-            throw new \Exception("Contexto con id $idContext no existe.");
+            throw new \Exception("No existe el contexto con id $idContext.");
         }
 
         $templates = [];

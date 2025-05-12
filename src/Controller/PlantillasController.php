@@ -3,7 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\Contextos;
+use App\Entity\Incidencias;
 use App\Entity\Plantillas;
+use App\Entity\Usuarios;
 use App\Form\PlantillasType;
 use App\Repository\PlantillasRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -276,41 +278,78 @@ final class PlantillasController extends AbstractController
 
         $idTemplate = $data['templateId'];
         $languageCode = $data['languageCode'];
-        $dataVariables = $data['data']; // Asumimos que 'datos' es un array en el cuerpo del POST
+        $idUser = $data['idUser'];
+        $idIncident = $data['idIncident'];
 
-
-        $plantilla = $this->entityManager->getRepository(Plantillas::class)->find($idTemplate);
-
-        if (!$plantilla) {
+        // Obtener la plantilla desde la base de datos
+        $template = $this->entityManager->getRepository(Plantillas::class)->find($idTemplate);
+        if (!$template) {
             return new JsonResponse(['error' => 'No se ha encontrado la plantilla con el ID: ' . $idTemplate], 404);
         }
 
-        $dataJson = $plantilla->getData();
+        // Verificar si los datos de usuario e incidente son válidos
+        $user = $this->entityManager->getRepository(Usuarios::class)->find($idUser);
+        $incident = $this->entityManager->getRepository(Incidencias::class)->find($idIncident);
 
-        if (empty($dataJson) || !is_array($dataJson)) {
-            return new JsonResponse(['error' => 'No hay datos en esta plantilla.'], 400);
+        if (!$user || !$incident) {
+            return new JsonResponse(['error' => 'No se ha encontrado el usuario o el incidente'], 404);
         }
 
-        // Si no se encuentra el idioma solicitado, usar el idioma por defecto (español)
-        if (!isset($dataJson[$languageCode])) {
-            $languageCode = 'es';
+        // Si no se especifica un idioma, usamos el predeterminado (español)
+        if (empty($languageCode) || !isset($template->getData()[$languageCode])) {
+            $languageCode = 'es'; // Idioma por defecto
         }
 
-        $contenido = $dataJson[$languageCode]['content'] ?? null;
+        // Obtener el contenido y el asunto de la plantilla para el idioma solicitado
+        $dataJson = $template->getData();
+        $content = $dataJson[$languageCode]['content'] ?? null;
         $subject = $dataJson[$languageCode]['subject'] ?? null;
 
-        if (!$contenido) {
+        if (!$content) {
             return new JsonResponse(['error' => "La plantilla no tiene contenido para el idioma '$languageCode'."], 400);
         }
 
-        foreach ($dataVariables as $key => $value) {
-            $placeholder = "{{" . $key . "}}";
-            $contenido = str_replace($placeholder, $value, $contenido);
+        $listVariables = $template->getIdcontext()->getVariables();
+
+        foreach ($listVariables as $variableName) {
+            $code = $variableName->getCode();
+            $placeholder = "{{" . $code . "}}";
+            $value = '';
+
+            switch ($code) {
+                case 'GUEST_NAME':
+                    $value = $user->getName();
+                    break;
+                case 'USER_SURNAME':
+                    $value = $user->getSurname();
+                    break;
+                case 'USER_EMAIL':
+                    $value = $user->getEmail();
+                    break;
+                case 'TASK_ID':
+                    $value = $incident->getId();
+                    break;
+                case 'TASK_WHERE':
+                    $value = $incident->getPlace();
+                    break;
+                case 'TASK_DESCRIPTION':
+                    $value = $incident->getDescription();
+                    break;
+                case 'TASK_STATUS':
+                    $value = $incident->getStatus();
+                    break;
+                case 'HOTEL_NAME':
+                    $value = "HOTEL JXY";
+                    break;
+            }
+
+            $content = str_replace($placeholder, $value, $content);
             $subject = str_replace($placeholder, $value, $subject);
         }
 
+        // Devolver la plantilla renderizada junto con el asunto
         return new JsonResponse([
-            'rendered' => $contenido,
+            'rendered' => $content,
             'subject' => $subject
         ]);
     }
